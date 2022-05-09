@@ -1,0 +1,17 @@
+[
+ {
+   "FromCurrency": "USD",
+   "ToCurrency": "CAD",
+   "Rate": 1.34
+ },
+ {
+   "FromCurrency": "CAD",
+   "ToCurrency": "GBP",
+   "Rate": 0.58
+ },
+ {
+   "FromCurrency": "USD",
+   "ToCurrency": "EUR",
+   "Rate": 0.86
+ }
+]
