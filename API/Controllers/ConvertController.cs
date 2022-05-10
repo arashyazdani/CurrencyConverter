@@ -9,6 +9,7 @@ using API.Errors;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -32,16 +33,16 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<string>> Convert(string fromCurrency, string toCurrency, decimal amount)
+        public async Task<ActionResult<string>> Convert([FromQuery] GetConvertDto convertItems)
         {
             try
             {
-                var convertRate = _currencyService.IsCurrencyCheckAsync(fromCurrency.ToUpper(), toCurrency.ToUpper());
+                var convertRate = _currencyService.IsCurrencyCheckAsync(convertItems.FromCurrency.ToUpper(), convertItems.ToCurrency.ToUpper());
 
                 if (convertRate.Result != null)
                 {
-                    var returnAmount = amount * convertRate.Result.Rate;
-                    return Ok(returnAmount.ToString());
+                    var returnAmount = convertItems.Amount * convertRate.Result.Rate;
+                    return Ok(new ApiResponse(200, "Your amount is: " + returnAmount.ToString()));
                 }
 
                 return BadRequest(new ApiResponse(404, "Entered exchange rate has not found."));
@@ -66,9 +67,11 @@ namespace API.Controllers
             try
             {
                 var rates = await _repo.ListAllAsync();
-                //rates = null;
+                
                 if (rates == null) return NotFound(new ApiResponse(404));
+
                 var data = _mapper.Map<IReadOnlyList<CurrencyRate>, IReadOnlyList<CurrencyRateToReturnDto>>(rates);
+                
                 return Ok(data);
             }
             catch (Exception ex)
@@ -85,14 +88,42 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IReadOnlyList<CurrencyRate>>> UpdateCurrencyRates([FromBody] List<CurrencyRateCheckDto> currencies)
+        public async Task<ActionResult<IReadOnlyList<CurrencyRate>>> UpdateCurrencyRates([FromBody] IList<CurrencyRateSpec> currencies)
         {
             try
             {
-                var rates = await _repo.ListAllAsync();
-                //rates = null;
-                if (rates == null) return NotFound(new ApiResponse(404));
-                return Ok(rates);
+                var rates = await _currencyService.UpdateCurrencyRatesAsync(currencies);
+
+                if (rates.Any())
+                {
+                    return Ok(rates);
+                }
+                
+                return BadRequest(new ApiResponse(400));
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult >= 500)
+                {
+                    return BadRequest(new ApiResponse(500, ex.Message));
+                }
+                return BadRequest(new ApiResponse(400, ex.Message));
+            }
+        }
+
+        [HttpDelete("deleteallrates")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<string>> DeleteAllCurrencyRates()
+        {
+            try
+            {
+                var deletedRates = await _currencyService.DeleteAllCurrencyRatesAsync();
+                
+                if (!deletedRates) return BadRequest(new ApiResponse(400));
+
+                return Ok(new ApiResponse(200, "All rates has been deleted."));
             }
             catch (Exception ex)
             {

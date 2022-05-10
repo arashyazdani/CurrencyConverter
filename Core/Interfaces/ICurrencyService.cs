@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Entities;
+using Core.Specifications;
 
 namespace Core.Interfaces
 {
@@ -11,6 +12,8 @@ namespace Core.Interfaces
     {
         Task<CurrencyRate> IsCurrencyCheckAsync(string fromCurrency, string toCurrency);
 
-        Task<IReadOnlyList<CurrencyRate>> UpdateCurrencyRates(IReadOnlyList<CurrencyRate> currencyRates);
+        Task<IList<CurrencyRateSpec>> UpdateCurrencyRatesAsync(IList<CurrencyRateSpec> currencyRates);
+
+        Task<bool> DeleteAllCurrencyRatesAsync();
     }
 }

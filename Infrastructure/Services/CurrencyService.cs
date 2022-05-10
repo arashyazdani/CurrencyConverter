@@ -5,16 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 
 namespace Infrastructure.Services
 {
     public class CurrencyService : ICurrencyService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<CurrencyRate> _repo;
 
-        public CurrencyService(IUnitOfWork unitOfWork)
+        public CurrencyService(IUnitOfWork unitOfWork, IGenericRepository<CurrencyRate> repo)
         {
             _unitOfWork = unitOfWork;
+            _repo = repo;
         }
 
         public async Task<CurrencyRate> IsCurrencyCheckAsync(string fromCurrency, string toCurrency)
@@ -104,9 +107,50 @@ namespace Infrastructure.Services
             return null;
         }
 
-        public Task<IReadOnlyList<CurrencyRate>> UpdateCurrencyRates(IReadOnlyList<CurrencyRate> currencyRates)
+        public async Task<IList<CurrencyRateSpec>> UpdateCurrencyRatesAsync(IList<CurrencyRateSpec> currencyRates)
         {
-            throw new NotImplementedException();
+            var inputListDistinct = currencyRates.Distinct().ToList();
+
+            var allCurrencyRates = await _unitOfWork.Repository<CurrencyRate>().ListAllAsync();
+            
+            if (allCurrencyRates.Any())
+            {
+                _repo.RemoveRange(allCurrencyRates);
+            }
+
+            List<CurrencyRate> currencyRateList = new List<CurrencyRate>();
+
+            foreach (var item in inputListDistinct)
+            {
+                var currencyRate = new CurrencyRate
+                {
+                    FromCurrency = item.FromCurrency.ToUpper(),
+                    ToCurrency = item.ToCurrency.ToUpper(),
+                    Rate = item.Rate
+                };
+                currencyRateList.Add(currencyRate);
+            }
+
+            _unitOfWork.Repository<CurrencyRate>().AddRange(currencyRateList);
+
+            var currencyResult = await _unitOfWork.Complete();
+
+            if (currencyResult <= 0) return null;
+
+            return inputListDistinct;
+        }
+
+        public async Task<bool> DeleteAllCurrencyRatesAsync()
+        {
+            var allCurrencyRates = await _unitOfWork.Repository<CurrencyRate>().ListAllAsync();
+            if (allCurrencyRates.Any())
+            {
+                _repo.RemoveRange(allCurrencyRates);
+                var currencyResult = await _unitOfWork.Complete();
+                if (currencyResult <= 0) return false;
+            }
+
+            return true;
         }
     }
 }

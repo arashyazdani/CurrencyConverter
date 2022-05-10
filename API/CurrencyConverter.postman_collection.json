@@ -1,0 +1,121 @@
+{
+	"info": {
+		"_postman_id": "50755b1f-685e-4bd8-8467-aa98dd7edc3d",
+		"name": "CurrencyConverter",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Test Currency Converter API",
+			"item": [
+				{
+					"name": "Get All Rates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7246/api/Convert/getallrates",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7246",
+							"path": [
+								"api",
+								"Convert",
+								"getallrates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Rates",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n  {\r\n    \"fromCurrency\": \"USD\",\r\n    \"toCurrency\": \"CAD\",\r\n    \"rate\": 1.34\r\n  },\r\n  {\r\n    \"fromCurrency\": \"CAD\",\r\n    \"toCurrency\": \"GBP\",\r\n    \"rate\": 0.58\r\n  },\r\n  {\r\n    \"fromCurrency\": \"USD\",\r\n    \"toCurrency\": \"EUR\",\r\n    \"rate\": 0.86\r\n  }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7246/api/Convert/updaterates",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7246",
+							"path": [
+								"api",
+								"Convert",
+								"updaterates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete All Rates",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7246/api/Convert/deleteallrates",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7246",
+							"path": [
+								"api",
+								"Convert",
+								"deleteallrates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Convert",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7246/api/Convert/convert?FromCurrency=USD&ToCurrency=CAD&Amount=1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7246",
+							"path": [
+								"api",
+								"Convert",
+								"convert"
+							],
+							"query": [
+								{
+									"key": "FromCurrency",
+									"value": "USD"
+								},
+								{
+									"key": "ToCurrency",
+									"value": "CAD"
+								},
+								{
+									"key": "Amount",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
